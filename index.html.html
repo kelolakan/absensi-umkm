@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir Absensi UMKM</title>
+    <style>
+        /* CSS Sederhana untuk UI Menarik dan Mobile-Friendly */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Mengatur ke atas */
+            min-height: 100vh; /* Pastikan mengambil tinggi viewport */
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box; /* Untuk padding tidak membuat overflow */
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px; /* Batasi lebar agar rapi di desktop */
+            box-sizing: border-box;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+        input[type="text"],
+        input[type="tel"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus,
+        input[type="tel"]:focus,
+        select:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            font-weight: 700;
+        }
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        #responseMessage {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            display: none; /* Sembunyikan secara default */
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            color: #28a745;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        /* Media Queries untuk Responsif di Mobile */
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px 15px;
+                margin: 10px;
+                border-radius: 8px;
+            }
+            h2 {
+                font-size: 1.5em;
+                margin-bottom: 20px;
+            }
+            button {
+                padding: 12px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Absensi Kegiatan UMKM</h2>
+        <form id="attendanceForm">
+            <div class="form-group">
+                <label for="namaPeserta">Nama Lengkap Peserta:</label>
+                <input type="text" id="namaPeserta" name="namaPeserta" required>
+            </div>
+
+            <div class="form-group">
+                <label for="noWhatsApp">Nomor WhatsApp:</label>
+                <input type="tel" id="noWhatsApp" name="noWhatsApp" placeholder="contoh: 081234567890" required>
+            </div>
+
+            <div class="form-group">
+                <label for="namaUsaha">Nama Usaha / UMKM:</label>
+                <input type="text" id="namaUsaha" name="namaUsaha" required>
+            </div>
+
+            <div class="form-group">
+                <label for="pilihanKelas">Pilih Kelas / Event:</label>
+                <select id="pilihanKelas" name="pilihanKelas" required>
+                    <option value="">-- Pilih --</option>
+                    <option value="Workshop Digital Marketing">Workshop Digital Marketing</option>
+                    <option value="Pelatihan Fotografi Produk">Pelatihan Fotografi Produk</option>
+                    <option value="Seminar Kewirausahaan Muda">Seminar Kewirausahaan Muda</option>
+                    <option value="Kelas Keuangan UMKM">Kelas Keuangan UMKM</option>
+                    <option value="Workshop Desain Grafis">Workshop Desain Grafis</option>
+                </select>
+            </div>
+
+            <button type="submit">Kirim Absensi</button>
+        </form>
+        <div id="responseMessage"></div>
+    </div>
+
+    <script>
+        // *** PENTING: GANTI URL INI DENGAN URL DEPLOY GOOGLE APPS SCRIPT ANDA ***
+        // Ikuti langkah-langkah di Bagian 2 untuk mendapatkan URL ini.
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxrgrxNo_4SAbAUfMmoGuG_hCqaFZCKbfPqayCnT3mrXlcZ0niLPjNyYmOdIa-9crPH/exec'; 
+
+        document.getElementById('attendanceForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Mencegah form reload halaman
+
+            const form = event.target;
+            const formData = new FormData(form);
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+
+            const responseMessage = document.getElementById('responseMessage');
+            responseMessage.style.display = 'none'; // Sembunyikan pesan sebelumnya
+            responseMessage.className = ''; // Hapus kelas sebelumnya
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Penting untuk Google Apps Script
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(data).toString()
+                });
+
+                // Karena mode 'no-cors', kita tidak bisa membaca response.ok atau response.json().
+                // Kita asumsikan berhasil jika tidak ada error jaringan.
+                // Google Apps Script akan mencatat data terlepas dari respons CORS.
+                responseMessage.textContent = 'Absensi berhasil dikirim! Terima kasih.';
+                responseMessage.classList.add('success');
+                responseMessage.style.display = 'block';
+                form.reset(); // Kosongkan formulir setelah berhasil
+            } catch (error) {
+                console.error('Error:', error);
+                responseMessage.textContent = 'Terjadi kesalahan saat mengirim absensi. Mohon coba lagi.';
+                responseMessage.classList.add('error');
+                responseMessage.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
